@@ -12,3 +12,8 @@ fig = px.scatter(gapminder, x="gdpPercap", y="lifeExp",
                  log_x=True, animation_frame="year", title="Gapminder",
                  range_x= [100, 100000], range_y=[25, 90])
 fig.show()
+
+fig2 = px.line_3d(asia, x="year", y="pop", z="gdpPercap", color="country", 
+                    title="Nordic countries GDP per capita 1952-2007",
+                    labels=dict(gpdPercap = "GDP/capita", year = "Year", country = "Country"))
+fig2.show()
