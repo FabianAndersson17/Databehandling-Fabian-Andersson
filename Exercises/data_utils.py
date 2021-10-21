@@ -1,7 +1,6 @@
 import seaborn as sns
-import matplotlib.pyplot as plt
-import pandas as pd
 
-fig, ax = plt.subplots(1, 2, )
-def Plot_Missing_Data(dataFrame):
-    sns.barplot(data=dataFrame, x=dataFrame.isnull(by="rows"), y=dataFrame.isnull().nunique())
+def plot_missing_data(dataFrame):
+    dataFrame_nullSeris = dataFrame.isnull().sum()
+    dataFrame_Clean_Series=dataFrame_nullSeris[dataFrame_nullSeris>0]
+    sns.barplot(x=dataFrame_Clean_Series.index, y=dataFrame_Clean_Series.values)
