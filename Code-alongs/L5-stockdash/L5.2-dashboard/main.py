@@ -5,6 +5,7 @@ import dash
 from load_data import StockDataLocal
 from dash.dependencies import Output, Input
 import plotly_express as px
+from time_filtering import filter_timegit 
 
 stock_data_object = StockDataLocal()
 
@@ -49,6 +50,11 @@ def update_graph(stock, time_index):
     dff_daily, dff_intraday = df_dict[stock]
 
     dff = dff_intraday if time_index <= 2 else dff_daily
+
+    # maps 0-6 to number of days
+    days = {i: day for i, day in enumerate([1, 7, 30, 90, 365, 365*5])}
+
+    dff = dff if time_index == 6 else filter_time(dff, days[time_index])
 
     fig = px.line(dff_daily, x = dff_daily.index, y="close")
 
