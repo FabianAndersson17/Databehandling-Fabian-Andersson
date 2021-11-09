@@ -30,6 +30,9 @@ stylesheets = [dbc.themes.MATERIA]
 app = dash.Dash(__name__, external_stylesheets = stylesheets)
 
 app.layout = html.Div([
+
+    dbc.Card
+
     html.H1("Stocks viewer"),
     html.P("Choose a stock"),
     dcc.Dropdown(id="stock-picker-dropdown", className="",
