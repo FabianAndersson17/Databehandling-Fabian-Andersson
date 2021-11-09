@@ -86,5 +86,14 @@ def update_graph(json_df, stock, ohlc) :
 
     return fig # fig object goes into Output property i.e figure
 
+@app.callback(
+    Output("highest-value", "children"),
+    Output("lowest-value", "children"),
+    Input("filtered-df", "data"),
+    Input("ohlc-radio", "value")
+)
+
+def highest_lowest_value(json_df, ohlc):
+    pass
 if __name__ == "__main__":
     app.run_server(debug=True)
