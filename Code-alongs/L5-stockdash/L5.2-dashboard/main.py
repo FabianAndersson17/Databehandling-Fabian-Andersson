@@ -2,6 +2,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 from dash import dcc, html
 import dash
+from pandas.core.reshape import tile
 from load_data import StockDataLocal
 from dash.dependencies import Output, Input
 import plotly_express as px
@@ -17,6 +18,10 @@ stock_options_dropdown = [{"label": name, "value": symbol}
 df_dict = {symbol: stock_data_object.stock_dataframe(symbol)
             for symbol in symbol_dict}
 
+#OHLC options - Open, High, Low, Close
+ohlc_options = [{"label": option.capitalize(), "value": option} 
+                for option in ["open", "high", "low", "close"]]
+
 slider_marks = {i: mark for i, mark in enumerate(
     ["1 day", "1 week", "1 month", "3 month", "1 year", "5 year", "Max"]
 )}
@@ -30,6 +35,12 @@ app.layout = html.Div([
             options=stock_options_dropdown,
             value="AAPL"
             ),
+    html.P(id = "highest-value"),
+    html.P(id = "lowest-value"),
+    dcc.RadioItems(id='ohlc-radio', className='',
+        options=ohlc_options,
+        value='close'
+    ),
     dcc.Graph(id="stock-graph", className=""),
 
     dcc.Slider(id='time-slider', className='',
@@ -37,17 +48,19 @@ app.layout = html.Div([
                 step=None,
                 value=3,
                 marks = slider_marks
-                )
+                ),
+    # Stores an intermediate value on the clients browser for sharing between callbacks
+    dcc.Store(id = "filtered-df")
 ])
 
-@app.callback(
-    Output("stock-graph", "figure"),
-    Input("stock-picker-dropdown", "value"),
-    Input("time-slider", "value")
-)
-
-def update_graph(stock, time_index):
-
+@app.callback(Output("filtered-df", "data"),
+              Input("stock-picker-dropdown", "value"),
+              Input("time-slider", "value"))
+def filter_df(stock, time_index):
+    """Filters the dataframe and stores in intermidiary for callbacks
+    Returns:
+        json object of fultered dataframe
+    """
     dff_daily, dff_intraday = df_dict[stock]
 
     dff = dff_intraday if time_index <= 2 else dff_daily
@@ -57,7 +70,19 @@ def update_graph(stock, time_index):
 
     dff = dff if time_index == 6 else filter_time(dff, days[time_index])
 
-    fig = px.line(dff, x = dff.index, y="close")
+    return dff.to_json()
+
+@app.callback(
+    Output("stock-graph", "figure"),
+    Input("filtered-df", "data"),
+    Input("stock-picker-dropdown", "value"),
+    Input("ohlc-radio", "value")
+)
+
+def update_graph(json_df, stock, ohlc) :
+
+    dff = pd.read_json(json_df)
+    fig = px.line(dff, x = dff.index, y=ohlc, title= symbol_dict[stock])
 
     return fig # fig object goes into Output property i.e figure
 
