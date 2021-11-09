@@ -26,8 +26,8 @@ ohlc_options = [{"label": option.capitalize(), "value": option}
 slider_marks = {i: mark for i, mark in enumerate(
     ["1 day", "1 week", "1 month", "3 month", "1 year", "5 year", "Max"]
 )}
-
-app = dash.Dash(__name__)
+stylesheets = [dbc.themes.MATERIA]
+app = dash.Dash(__name__, external_stylesheets = stylesheets)
 
 app.layout = html.Div([
     html.H1("Stocks viewer"),
