@@ -28,7 +28,8 @@ slider_marks = {i: mark for i, mark in enumerate(
     ["1 day", "1 week", "1 month", "3 month", "1 year", "5 year", "Max"]
 )}
 stylesheets = [dbc.themes.MATERIA]
-app = dash.Dash(__name__, external_stylesheets = stylesheets)
+app = dash.Dash(__name__, external_stylesheets = stylesheets,
+                meta_tags=[dict(name="viewport", content="width=device-width, initial-scale=1.0")])
 
 app.layout = dbc.Container([
 
@@ -54,17 +55,28 @@ app.layout = dbc.Container([
         )
     ], className="mt-3"),
 
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(id="stock-graph", className=""),
 
-    html.P(id = "highest-value"),
-    html.P(id = "lowest-value"),
-    dcc.Graph(id="stock-graph", className=""),
-
-    dcc.Slider(id='time-slider', className='',
-                min=0, max=6,
-                step=None,
-                value=3,
-                marks = slider_marks
+            dcc.Slider(id='time-slider', className='',
+                        min=0, max=6,
+                        step=None,
+                        value=3,
+                        marks = slider_marks
                 ),
+        ], lg = {"size": 6, "offset": 1}, xl={"size": 6, "offset": 1}),
+    dbc.Col([
+        dbc.Card([
+            html.H2("Highest value", className="h5 mt-3 mx-3"),
+            html.P(id = "highest-value", className="mx-3 h1 text-success"),
+        ], className = "mt-5 w-50"),
+        dbc.Card([
+            html.H2("Lowest value", className="h5 mt-3 mx-3"),
+            html.P(id = "lowest-value", className ="mx-3 h1 text-danger"),
+        ], className = "mt-5 w-50")
+    ])
+    ]),
     # Stores an intermediate value on the clients browser for sharing between callbacks
     dcc.Store(id = "filtered-df")
 ], fluid=True)
@@ -112,8 +124,8 @@ def update_graph(json_df, stock, ohlc) :
 def highest_lowest_value(json_df, ohlc):
 
     dff = pd.read_json(json_df)
-    highest_value = f"Highest {dff[ohlc].max():.1f}"
-    lowest_value = f"Lowest {dff[ohlc].min():.1f}"
+    highest_value = f"{dff[ohlc].max():.1f}"
+    lowest_value = f"{dff[ohlc].min():.1f}"
     return highest_value, lowest_value
 
 if __name__ == "__main__":
