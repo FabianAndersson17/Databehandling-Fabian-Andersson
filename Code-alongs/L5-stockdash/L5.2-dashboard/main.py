@@ -8,6 +8,7 @@ from load_data import StockDataLocal
 from dash.dependencies import Output, Input
 import plotly_express as px
 from time_filtering import filter_time 
+import dash_bootstrap_components as dbc
 
 stock_data_object = StockDataLocal()
 
@@ -29,22 +30,33 @@ slider_marks = {i: mark for i, mark in enumerate(
 stylesheets = [dbc.themes.MATERIA]
 app = dash.Dash(__name__, external_stylesheets = stylesheets)
 
-app.layout = html.Div([
+app.layout = dbc.Container([
 
-    dbc.Card
+    dbc.Card([
+        dbc.CardBody(html.H1("Stocky dashboard", className="text-primary m-3"))
+    ], className="mt-3"),
 
-    html.H1("Stocks viewer"),
-    html.P("Choose a stock"),
-    dcc.Dropdown(id="stock-picker-dropdown", className="",
-            options=stock_options_dropdown,
-            value="AAPL"
-            ),
+    dbc.Row([
+        dbc.Col(html.P("Choose a stock"), className="mt-1",
+                lg="4", xl = {"size": 2, "offset": 1}),
+        dbc.Col(
+            dcc.Dropdown(id="stock-picker-dropdown", className="",
+                        options=stock_options_dropdown,
+                        value="AAPL"
+                        ),
+        lg="4", xl="3" ),
+        dbc.Col(
+            dbc.Card(
+                dcc.RadioItems(id='ohlc-radio', className='',
+                                options=ohlc_options,
+                                value='close')
+            ), lg="4", xl="3"
+        )
+    ], className="mt-3"),
+
+
     html.P(id = "highest-value"),
     html.P(id = "lowest-value"),
-    dcc.RadioItems(id='ohlc-radio', className='',
-        options=ohlc_options,
-        value='close'
-    ),
     dcc.Graph(id="stock-graph", className=""),
 
     dcc.Slider(id='time-slider', className='',
@@ -55,7 +67,7 @@ app.layout = html.Div([
                 ),
     # Stores an intermediate value on the clients browser for sharing between callbacks
     dcc.Store(id = "filtered-df")
-])
+], fluid=True)
 
 @app.callback(Output("filtered-df", "data"),
               Input("stock-picker-dropdown", "value"),
